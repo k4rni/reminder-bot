@@ -1,5 +1,6 @@
 import { CONFIG } from "./config.ts";
 import { QUESTIONS } from "./questions.ts";
+import "./scheduler.ts";
 
 async function sendReminder(type: keyof typeof QUESTIONS) {
   const questions = QUESTIONS[type];
