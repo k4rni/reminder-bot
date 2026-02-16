@@ -1,27 +1,12 @@
 import { sendReminder } from "./main.ts";
 
-const now = new Date();
+Deno.cron("daily-check", "0 18 * * *", async () => {
+  console.log("Running reminder check");
 
-const day = now.getDate();
-const month = now.getMonth();
-const weekday = now.getDay();
+  const now = new Date();
+  const weekday = now.getDay();
 
-// Sunday
-if (weekday === 0) {
-  await sendReminder("weekly");
-}
-
-// First day of month
-if (day === 1) {
-  await sendReminder("monthly");
-}
-
-// July 1st
-if (day === 1 && (month === 0 || month === 6)) {
-  await sendReminder("halfYear");
-}
-
-// January 1st
-if (day === 1 && month === 0) {
-  await sendReminder("yearly");
-}
+  if (weekday === 0) {
+    await sendReminder("weekly");
+  }
+});
