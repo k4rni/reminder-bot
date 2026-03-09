@@ -1,110 +1,66 @@
-// Questions
-export const QUESTIONS = {
-  weekly: [
-    "Mood Meter [ ☀️  ⛅  ☁️  🌧️  🌩️ ]",
-    "Something you learned",
-    "Moment you want to remember",
-    "What gave you energy?",
-    "What drained you?",
-  ],
+import { prompts } from "./prompts.ts";
 
-  monthly: [
-    "Accomplishments (big or small)",
-    "Core memories from this month",
-    "Gratitude list",
-    "Favorite song of the month",
-    "Comfort media (show/movie/book/video)",
-    "Best thing you ate or discovered",
-    "What you want MORE of next month",
-    "What you want LESS of next month",
-  ],
+const kv = await Deno.openKv();
 
-  halfYear: [
-    "Biggest win so far",
-    "Something that has changed since the start of the year",
-    "One highlight memory",
-    "Something still in progress",
-    "One focus for the next 6 months",
-  ],
+const WEBHOOK = Deno.env.get("DISCORD_WEBHOOK");
 
-  yearly: [
-    "Theme/title of your year",
-    "What are you most proud of this year?",
-    "Plot twist of the year",
-    "What did this year teach you about yourself?",
-    "Goals achieved or moved toward",
-    "People, places, or habits that supported you",
-    "Something you’re leaving behind",
-    "Best decision you made",
-  ],
-};
+async function sendMessage(title: string, list: string[]) {
+  if (!WEBHOOK) throw new Error("Missing webhook");
 
-// Discord Post Function
-const TOKEN = Deno.env.get("DISCORD_TOKEN")!;
-const CHANNEL_ID = Deno.env.get("CHANNEL_ID")!;
+  const message =
+    `**${title} Reflection**\n\n` + list.map((p) => `• ${p}`).join("\n");
 
-async function sendMessage(title: string, questions: string[]) {
-  const content =
-    `## ${title}\n\n` + questions.map((q, i) => `${i + 1}. ${q}`).join("\n");
-
-  await fetch(`https://discord.com/api/v10/channels/${CHANNEL_ID}/messages`, {
+  await fetch(WEBHOOK, {
     method: "POST",
-    headers: {
-      Authorization: `Bot ${TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ content }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content: message }),
   });
 }
 
-// Set Time
-const TARGET_UTC_HOUR = 5;
-
-function isTargetHour(date: Date) {
-  return date.getUTCHours() === TARGET_UTC_HOUR;
-}
-
-async function runScheduler() {
+async function run() {
   const now = new Date();
 
-  if (!isTargetHour(now)) {
-    console.log("Not scheduled hour.");
-    return;
+  const week = getWeek(now);
+  const month = now.getMonth() + 1;
+
+  const lastWeek = (await kv.get(["lastWeekly"])).value;
+  const lastMonth = (await kv.get(["lastMonthly"])).value;
+  const lastHalf = (await kv.get(["lastHalf"])).value;
+  const lastYear = (await kv.get(["lastYear"])).value;
+
+  // Weekly
+  if (lastWeek !== week) {
+    await sendMessage("Weekly", prompts.weekly);
+    await kv.set(["lastWeekly"], week);
   }
 
-  const day = now.getUTCDate();
-  const month = now.getUTCMonth() + 1;
-  const weekday = now.getUTCDay();
-
-  console.log("Checking reminders:", now.toISOString());
-
-  // YEARLY — Dec 31
-  if (month === 12 && day === 31) {
-    await sendMessage("✨ YEARLY REFLECTION ✨", QUESTIONS.yearly);
-    return;
+  // Monthly
+  if (lastMonth !== month) {
+    await sendMessage("Monthly", prompts.monthly);
+    await kv.set(["lastMonthly"], month);
   }
 
-  // HALF YEAR — June 30
-  if (month === 6 && day === 30) {
-    await sendMessage("🌿 HALF YEAR CHECK-IN 🌿", QUESTIONS.halfYear);
-    return;
+  // Half year
+  const half = month <= 6 ? 1 : 2;
+  if (lastHalf !== half) {
+    await sendMessage("Half-Year", prompts.halfYear);
+    await kv.set(["lastHalf"], half);
   }
 
-  // MONTHLY — 1st of month
-  if (day === 1) {
-    await sendMessage("📅 MONTHLY REFLECTION 📅", QUESTIONS.monthly);
-    return;
+  // Yearly
+  const year = now.getFullYear();
+  if (lastYear !== year) {
+    await sendMessage("Yearly", prompts.yearly);
+    await kv.set(["lastYear"], year);
   }
 
-  // WEEKLY — Sunday
-  if (weekday === 0) {
-    await sendMessage("🗓️ WEEKLY CHECK-IN 🗓️", QUESTIONS.weekly);
-    return;
-  }
-
-  console.log("No reminder today.");
+  return new Response("ok");
 }
 
-Deno.cron("reminder-check", "0 * * * *", runScheduler);
+function getWeek(date: Date) {
+  const first = new Date(date.getFullYear(), 0, 1);
+  const pastDays = (date.getTime() - first.getTime()) / 86400000;
+  return Math.ceil((pastDays + first.getDay() + 1) / 7);
+}
 
-Deno.serve(() => new Response("Reminder bot running"));
+Deno.serve(run);
