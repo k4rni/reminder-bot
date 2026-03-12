@@ -5,9 +5,9 @@ A lightweight Deno cron job that sends periodic prompts to a Discord channel to 
 ## Features
 
 - **Weekly reminders** — Fires every Sunday at 9PM PST
-- **Monthly reminders** — Fires on the 1st of every month at 9PM PST
-- **Half-year reminders** — Fires on June 30th at 9PM PST
-- **Yearly reminders** — Fires on December 31st at 9PM PST
+- **Monthly reminders** — Fires on the 1st of every month at 8PM PST
+- **Half-year reminders** — Fires on June 30th at 8PM PST
+- **Yearly reminders** — Fires on December 31st at 8PM PST
 
 ## Prerequisites
 
