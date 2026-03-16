@@ -45,10 +45,10 @@ Deploy to [Deno Deploy](https://deno.com/deploy) and add your environment variab
 
 | Job                  | Cron        | Description                                 |
 | -------------------- | ----------- | ------------------------------------------- |
-| `weekly-reminder`    | `0 5 * * 1` | Every Monday at 5AM UTC (Sunday 9PM PST)    |
-| `monthly-reminder`   | `0 4 2 * *` | 2nd of every month at 4AM UTC (1st 8PM PST) |
-| `half-year-reminder` | `0 4 1 7 *` | July 1st at 5AM UTC (June 30th 8PM PST)     |
-| `yearly-reminder`    | `0 4 1 1 *` | Jan 1st at 5AM UTC (Dec 31st 8PM PST)       |
+| `weekly-reminder`    | `0 4 * * 1` | Every Monday at 5AM UTC (Sunday 9PM PST)    |
+| `monthly-reminder`   | `0 3 2 * *` | 2nd of every month at 4AM UTC (1st 8PM PST) |
+| `half-year-reminder` | `0 3 1 7 *` | July 1st at 5AM UTC (June 30th 8PM PST)     |
+| `yearly-reminder`    | `0 3 1 1 *` | Jan 1st at 5AM UTC (Dec 31st 8PM PST)       |
 
 ## Project Structure
 
@@ -58,3 +58,7 @@ Deploy to [Deno Deploy](https://deno.com/deploy) and add your environment variab
 ├── prompts.ts      # Weekly, monthly, half-year, and yearly prompt lists
 └── README.md
 ```
+
+## Note to Self
+
+Need to consider how to automatically update times according to Daylight Savings.

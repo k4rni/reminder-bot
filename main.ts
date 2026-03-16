@@ -13,19 +13,19 @@ async function sendMessage(title: string, items: string[]) {
   });
 }
 
-Deno.cron("weekly-reminder", "0 5 * * 1", async () => {
+Deno.cron("weekly-reminder", "0 4 * * 1", async () => {
   await sendMessage("# Weekly Reminder", weekly);
 });
 
-Deno.cron("monthly-reminder", "0 4 2 * *", async () => {
+Deno.cron("monthly-reminder", "0 3 2 * *", async () => {
   await sendMessage("# Monthly Reminder", monthly);
 });
 
-Deno.cron("half-year-reminder", "0 4 1 7 *", async () => {
+Deno.cron("half-year-reminder", "0 3 1 7 *", async () => {
   await sendMessage("# Half-Year Reminder", halfYear);
 });
 
-Deno.cron("yearly-reminder", "0 4 1 1 *", async () => {
+Deno.cron("yearly-reminder", "0 3 1 1 *", async () => {
   await sendMessage("# Yearly Reminder", yearly);
 });
 
